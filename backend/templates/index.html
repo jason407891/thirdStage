@@ -1,0 +1,81 @@
+<!DOCTYPE html> <!--文件型態-->
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁標題</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}"/>
+    <meta charset="utf-8">
+</head>
+<body class="body">
+    <h2>發表一篇圖文</h2>
+    <span>文字內容</span><input id="textcontent"></input></br></br>
+    <span>圖片檔案</span><input type="file" id="phcontent"></input></br></br>
+    <button onclick="upload_and_update()">送出</button>
+
+    <hr>
+    <div class="container">
+    <!--
+    <img src="../static/wehelp.jpg" class="photo"></img></br>
+    <div>留言內容</div>   
+    <hr>
+    -->
+    </div>
+
+         
+
+
+    <script>
+
+        function upload(){
+            let texts=document.getElementById("textcontent").value;
+            let file=document.getElementById("phcontent").files[0];
+            let filename=file.name;
+
+            console.log(texts);
+            let formData = new FormData();
+            formData.append('text', texts);
+            formData.append('file', file);
+            formData.append('filename', filename);
+
+
+            fetch("/api/upload",{
+                method:"POST",
+                body:formData
+            })
+            .then(response=>{return response.json();})
+            .then(data=>{
+                console.log(data);
+            })
+        }
+
+        function display(){
+            fetch("/api/display")
+            .then(response=>{return response.json();})
+            .then(data=>{
+                let msgcontainer=document.querySelector(".container");
+                msgcontainer.innerHTML=``;
+                for(let i=0;i<data.data.length;i++){
+                let msg = document.createElement('div');
+                msg.classList.add('msg');
+                msg.innerHTML=`
+                <img src="${data.data[i][1]}" class="photo"></img></br>
+                <div>${data.data[i][0]}</div>   
+                <hr>
+                `
+                ;
+                msgcontainer.appendChild(msg);
+            }
+            })
+        }
+
+
+        function upload_and_update(){
+            upload();
+            setTimeout(()=>{display();},"1000");
+        }
+
+
+        window.onload=function(){display()};
+    </script>
+</body>
+</html>
